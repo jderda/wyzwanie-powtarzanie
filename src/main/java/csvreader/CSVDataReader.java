@@ -18,6 +18,7 @@ public class CSVDataReader {
     private static final String FILENAME = "data.csv";
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter monthKeyFormatter = DateTimeFormatter.ofPattern("yyyy-MM");
+    private static final DateTimeFormatter yearKeyFormatter = DateTimeFormatter.ofPattern("yyyy");
     
     
     Map<LocalDate, Double> data = new HashMap<>();
@@ -42,11 +43,11 @@ public class CSVDataReader {
         }
     }
 
-    private void summarizeData() {
+    private void summarizeData(DateTimeFormatter keyFormatter) {
         Map<String, StatisticSummary> summaries = new HashMap<>();
         
         this.data.forEach((key, value) -> {
-            String monthKey = key.format(monthKeyFormatter);
+            String monthKey = key.format(keyFormatter);
             if (!summaries.containsKey(monthKey)) {
                 summaries.put(monthKey, new StatisticSummary());
             }
@@ -74,7 +75,8 @@ public class CSVDataReader {
     public void printDataSummary() {
         readData();
         fillInGaps();
-        summarizeData();
+        summarizeData(monthKeyFormatter);
+        summarizeData(yearKeyFormatter);
     }
 
     public static void main(String[] args) {
