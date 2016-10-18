@@ -55,12 +55,28 @@ public class CSVDataReader {
         
         summaries.forEach((monthKey, summary) -> System.out.printf("%s -> %.2f\n", monthKey, summary.getAverage()));
     }
+    
+    private void fillInGaps() {
+        LocalDate earliestDate = this.data.keySet().stream().min(LocalDate::compareTo).get();
+        LocalDate latestDate = this.data.keySet().stream().max(LocalDate::compareTo).get();
+        LocalDate analysedDate = earliestDate;
+        while (analysedDate.isBefore(latestDate)) {
+            if (!this.data.containsKey(analysedDate)) {
+                LocalDate previousDay = analysedDate.minusDays(1);
+                LocalDate nextDay = analysedDate.plusDays(1);
+                double interpolatedValue = (this.data.get(previousDay)+this.data.get(nextDay))/2.0;
+                this.data.put(analysedDate, interpolatedValue);
+            }
+            analysedDate = analysedDate.plusDays(1);
+        }
+    }
 
     public void printDataSummary() {
         readData();
+        fillInGaps();
         summarizeData();
     }
-    
+
     public static void main(String[] args) {
         CSVDataReader reader = new CSVDataReader();
         reader.printDataSummary();
