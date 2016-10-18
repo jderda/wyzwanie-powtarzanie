@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -44,7 +45,7 @@ public class CSVDataReader {
     }
 
     private void summarizeData(DateTimeFormatter keyFormatter) {
-        Map<String, StatisticSummary> summaries = new HashMap<>();
+        Map<String, StatisticSummary> summaries = new TreeMap<>();
         
         this.data.forEach((key, value) -> {
             String monthKey = key.format(keyFormatter);
@@ -64,8 +65,12 @@ public class CSVDataReader {
         while (analysedDate.isBefore(latestDate)) {
             if (!this.data.containsKey(analysedDate)) {
                 LocalDate previousDay = analysedDate.minusDays(1);
-                LocalDate nextDay = analysedDate.plusDays(1);
-                double interpolatedValue = (this.data.get(previousDay)+this.data.get(nextDay))/2.0;
+                final LocalDate finalAnalysedDate = analysedDate;
+                LocalDate nextAvailableDay = this.data.keySet().stream()
+                        .filter(date -> date.isAfter(finalAnalysedDate))
+                        .min(LocalDate::compareTo)
+                        .get();
+                double interpolatedValue = (this.data.get(previousDay)+this.data.get(nextAvailableDay))/2.0;
                 this.data.put(analysedDate, interpolatedValue);
             }
             analysedDate = analysedDate.plusDays(1);
