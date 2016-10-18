@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class CSVDataReader {
 
     private static final String FILENAME = "data.csv";
@@ -22,7 +24,7 @@ public class CSVDataReader {
     
     private void readData() {
         Function<? super String[], ? extends LocalDate> keyMapper = strings -> LocalDate.parse(strings[0], formatter);
-        Function<? super String[], ? extends Double> valueMapper = strings -> Double.parseDouble(strings[1]);
+        Function<? super String[], ? extends Double> valueMapper = strings -> Double.parseDouble(StringUtils.deleteWhitespace(strings[1]).replace(',', '.'));
         
         try (Stream<String> stream = Files.lines(Paths.get(ClassLoader.getSystemResource(FILENAME).toURI()))) {
             stream
